@@ -1,14 +1,14 @@
-// const axios = require('axios');
-const twitch = require('./axios/twitch');
-
+const twitch = require('../axios/twitch');
 const { GraphQLObjectType, GraphQLList, GraphQLSchema } = require('graphql');
+
+const TwitchVideo = require('../mongo/models/Video');
 
 const {
   StreamerType,
   StreamType,
   VideoType,
   ClipType
-} = require('./typeDefs/index');
+} = require('../typeDefs/index');
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
@@ -39,8 +39,10 @@ const RootQuery = new GraphQLObjectType({
       type: GraphQLList(VideoType),
       async resolve(parent, args) {
         try {
-          const res = await twitch.get('/videos?user_id=63801297');
-          return res.data.data;
+          const res = await twitch.get(
+            `/videos?user_id=63801297&first=25&sort=time`
+          );
+          return res.data.data || [];
         } catch (err) {
           console.error(err);
         }
@@ -50,8 +52,11 @@ const RootQuery = new GraphQLObjectType({
       type: GraphQLList(ClipType),
       async resolve(parent, args) {
         try {
-          const res = await twitch.get('/clips?broadcaster_id=63801297');
-          return res.data.data;
+          const res = await twitch.get(
+            '/clips?broadcaster_id=63801297&first=100'
+          );
+
+          return res.data.data || [];
         } catch (err) {
           console.error(err);
         }
